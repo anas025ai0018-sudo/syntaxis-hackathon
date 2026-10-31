@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MediSync AI | Healthcare Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <section class="auth-screen" id="auth-screen" aria-labelledby="auth-title">
+      <div class="auth-card">
+        <div class="auth-brand">
+          <span class="brand-icon">✚</span>
+          <span>MediSync <small>DOCTOR WORKSPACE</small></span>
+        </div>
+        <p class="eyebrow">DOCTOR WORKSPACE</p>
+        <h1 id="auth-title">Sign in to MediSync</h1>
+        <p class="auth-description">
+          Sign in or create a doctor account. Patient records are scoped to that account.
+        </p>
+        <form id="auth-form" class="auth-form">
+          <label id="auth-name-field" hidden>
+            Doctor name
+            <input id="auth-name" name="name" type="text" autocomplete="name" maxlength="100" />
+          </label>
+          <label>
+            <span id="auth-email-label">Email address</span>
+            <input id="auth-email" name="email" type="email" autocomplete="username" required />
+            <small id="auth-email-hint" class="auth-hint" hidden>
+              We’ll email an 8-digit code to confirm you can access this Gmail inbox.
+            </small>
+          </label>
+          <label id="auth-password-field">
+            Password
+            <input id="auth-password" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="256" required />
+            <small id="auth-password-hint" class="auth-hint" hidden>Use at least 10 characters.</small>
+          </label>
+          <label id="auth-code-field" hidden>
+            Email verification code
+            <input
+              id="auth-verification-code"
+              name="verificationCode"
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              pattern="[0-9]{8}"
+              maxlength="8"
+              placeholder="8-digit code"
+            />
+            <small class="auth-hint">The code expires in 10 minutes.</small>
+            <small id="auth-verification-hint" class="auth-hint"></small>
+          </label>
+          <p id="auth-message" class="auth-message" role="status"></p>
+          <button type="submit" class="primary-btn auth-submit" id="auth-submit">Sign in</button>
+        </form>
+        <div id="auth-verification-actions" hidden>
+          <button type="button" class="text-btn auth-mode-toggle" id="auth-resend-code">
+            Resend verification code
+          </button>
+          <button type="button" class="text-btn auth-mode-toggle" id="auth-change-email">
+            Use a different Gmail address
+          </button>
+        </div>
+        <button type="button" class="text-btn auth-mode-toggle" id="auth-mode-toggle">
+          Create a doctor account
+        </button>
+        <div class="auth-divider"><span>or</span></div>
+        <button type="button" class="secondary-btn auth-demo-button" id="demo-mode-button">
+          Continue with shared demo data
+        </button>
+        <p class="auth-demo-note">
+          Demo records are shared. Your doctor account keeps its records separate.
+        </p>
+      </div>
+    </section>
+
+    <div class="app-shell" id="app-shell" hidden>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="#" class="brand" data-page="dashboard">
+          <span class="brand-icon">✚</span>
+          <span>MediSync <small>AI HEALTHCARE</small></span>
+        </a>
+        <button
+          type="button"
+          class="sidebar-collapse-toggle"
+          id="sidebar-collapse-toggle"
+          aria-label="Collapse navigation"
+          aria-controls="sidebar"
+          aria-expanded="true"
+          title="Collapse navigation"
+        >
+          <svg class="sidebar-collapse-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3.5" y="4" width="17" height="16" rx="3"></rect>
+            <path d="M9 4.5v15"></path>
+            <path class="sidebar-collapse-chevron" d="m15 9-3 3 3 3"></path>
+          </svg>
+        </button>
+      </div>
+
+      <p class="menu-label">WORKSPACE</p>
+      <nav class="navigation">
+        <button class="nav-link active" data-page="dashboard" title="Home">
+          ⌂ <span>Home</span>
+        </button>
+        <button class="nav-link" data-page="patients" title="Patients">
+          ♙ <span>Patients</span>
+        </button>
+        <button class="nav-link" data-page="new-visit" title="New Visit">
+          ＋ <span>New Visit</span>
+        </button>
+        <button class="nav-link" data-page="sync" title="Offline & Sync">
+          ⇄ <span>Offline & Sync</span>
+        </button>
+        <button class="nav-link" data-page="activity" title="Activity Log">
+          ◷ <span>Activity Log</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="offline-card">
+          <span class="online-dot"></span>
+          <div>
+            <strong id="connection-label">Connection status</strong>
+            <p id="connection-detail">Checking network...</p>
+          </div>
+        </div>
+        <p class="sidebar-note">MediSync AI Demo · v1.0</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button
+          class="menu-toggle"
+          id="menu-toggle"
+          aria-label="Toggle navigation"
+        >
+          ☰
+        </button>
+        <div class="breadcrumb">
+          Workspace / <strong id="breadcrumb">Dashboard</strong>
+        </div>
+        <div class="top-actions">
+          <span class="date-label" id="today"></span>
+          <div class="avatar" id="profile-avatar">D</div>
+          <div class="admin-label">
+            <span id="profile-name">Doctor</span><small id="profile-email">Doctor account</small>
+          </div>
+          <button type="button" class="secondary-btn logout-button" id="logout-button">Sign out</button>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- DASHBOARD -->
+        <section class="page active" id="dashboard">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">OVERVIEW</p>
+              <h1>Healthcare Dashboard</h1>
+              <p class="subtitle">
+                Monitor patient records and synchronization.
+              </p>
+            </div>
+            <button class="primary-btn" data-go="new-visit">
+              ＋ New patient visit
+            </button>
+          </div>
+
+          <div class="banner">
+            <div class="banner-icon">✚</div>
+            <div>
+              <h3>Your healthcare workspace</h3>
+              <p>
+                Record visits locally and review which records are waiting to
+                sync.
+              </p>
+            </div>
+            <span class="demo-tag">DEMO</span>
+          </div>
+
+          <div class="stats-grid">
+            <article class="stat-card">
+              <div class="stat-top">
+                <span>Total Patients</span><span class="stat-icon blue">♙</span>
+              </div>
+              <h2 id="total-patients">0</h2>
+              <p>Unique patient records</p>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top">
+                <span>Total Visits</span><span class="stat-icon purple">▤</span>
+              </div>
+              <h2 id="total-visits">0</h2>
+              <p>Visit entries recorded</p>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top">
+                <span>Pending Sync</span><span class="stat-icon orange">⇄</span>
+              </div>
+              <h2 id="pending-count">0</h2>
+              <p>Waiting for synchronization</p>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top">
+                <span>Synced Records</span
+                ><span class="stat-icon green">✓</span>
+              </div>
+              <h2 id="synced-count">0</h2>
+              <p>Marked synced in this demo</p>
+            </article>
+            <article
+              class="stat-card daily-visits-card"
+              id="daily-visits-card"
+              role="button"
+              tabindex="0"
+              aria-haspopup="dialog"
+              aria-controls="daily-visits-modal"
+              aria-label="View visits by day for the last seven days"
+            >
+              <div class="stat-top">
+                <span>Visits Today</span
+                ><span class="stat-icon teal">▣</span>
+              </div>
+              <h2 id="today-visits">0</h2>
+              <p id="today-visits-date">Visits recorded today</p>
+            </article>
+          </div>
+
+          <div id="daily-visits-modal" class="patient-detail-backdrop" hidden>
+            <section
+              class="patient-detail-dialog daily-visits-dialog"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="daily-visits-title"
+              tabindex="-1"
+            >
+              <div class="patient-detail-header">
+                <div>
+                  <p class="eyebrow">VISIT ACTIVITY</p>
+                  <h2 id="daily-visits-title">Visits by day</h2>
+                  <p class="subtitle">Daily visit totals for the last seven days, including today.</p>
+                </div>
+                <button
+                  type="button"
+                  id="close-daily-visits"
+                  class="secondary-btn"
+                  aria-label="Close visits chart"
+                >
+                  Close
+                </button>
+              </div>
+              <p id="daily-visits-summary" class="daily-visits-summary"></p>
+              <div id="daily-visits-chart" class="daily-visits-chart"></div>
+            </section>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>Recent Patient Visits</h2>
+                  <p>Latest records in this browser</p>
+                </div>
+                <button class="text-btn" data-go="patients">View all →</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Patient</th>
+                      <th>Visit date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recent-table"></tbody>
+                </table>
+              </div>
+              <p class="empty-state" id="recent-empty">
+                No records yet. Create your first visit.
+              </p>
+            </section>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>Sync Overview</h2>
+                  <p>Local record status</p>
+                </div>
+              </div>
+              <div class="sync-illustration">⇄</div>
+              <h3 class="center-text">Keep your records in sync</h3>
+              <p class="muted center-text">
+                Visits are saved on this device first, then uploaded to the
+                database when a connection is available.
+              </p>
+              <div class="progress-track">
+                <div id="sync-progress" class="progress-fill"></div>
+              </div>
+              <div class="progress-label">
+                <span>Synced</span><strong id="sync-percent">0%</strong>
+              </div>
+              <button class="secondary-btn full-btn" data-go="sync">
+                Manage synchronization
+              </button>
+            </section>
+          </div>
+
+          <section class="panel activity-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Recent Activity</h2>
+                <p>Actions in this browser session and saved log</p>
+              </div>
+              <button class="text-btn" data-go="activity">
+                View activity →
+              </button>
+            </div>
+            <div id="dashboard-activity" class="activity-list"></div>
+          </section>
+        </section>
+
+        <!-- PATIENTS -->
+        <section class="page" id="patients">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">RECORD MANAGEMENT</p>
+              <h1>Patients</h1>
+              <p class="subtitle">
+                Review the patient records saved in this browser.
+              </p>
+            </div>
+            <button class="primary-btn" data-go="new-visit">
+              ＋ Add patient
+            </button>
+          </div>
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Patient Records</h2>
+                <p id="patient-subtitle">All locally stored visit records</p>
+              </div>
+              <input
+                class="search-input"
+                id="patient-search"
+                type="search"
+                placeholder="Search by patient name or ID..."
+                aria-label="Search patients by name or patient ID"
+              />
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Patient ID</th>
+                    <th>Name</th>
+                    <th>Visit date</th>
+                    <th>Notes</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="patients-table"></tbody>
+              </table>
+            </div>
+            <p class="empty-state" id="patients-empty">
+              No patient records found.
+            </p>
+          </section>
+
+          <div id="patient-detail-modal" class="patient-detail-backdrop" hidden>
+            <section
+              class="patient-detail-dialog"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="patient-detail-title"
+              tabindex="-1"
+            >
+              <div class="patient-detail-header">
+                <div>
+                  <p class="eyebrow">PATIENT PROFILE</p>
+                  <h2 id="patient-detail-title">Patient details</h2>
+                  <p id="patient-detail-subtitle" class="subtitle"></p>
+                </div>
+                <button
+                  type="button"
+                  id="close-patient-details"
+                  class="secondary-btn"
+                  aria-label="Close patient details"
+                >
+                  Close
+                </button>
+              </div>
+              <div id="patient-detail-content"></div>
+            </section>
+          </div>
+        </section>
+
+        <!-- NEW VISIT -->
+        <section class="page" id="new-visit">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">PATIENT MANAGEMENT</p>
+              <h1>New Patient Visit</h1>
+              <p class="subtitle">
+                Enter fictional demo information to create a local record.
+              </p>
+            </div>
+          </div>
+        
+          <div class="patient-choice-grid">
+            <button
+              type="button"
+              class="patient-choice-card"
+              id="new-patient-option"
+            >
+              <span class="patient-choice-icon">＋</span>
+              <strong>New Patient</strong>
+              <span>Register a patient and create their first visit.</span>
+            </button>
+
+            <button
+              type="button"
+              class="patient-choice-card"
+              id="existing-patient-option"
+            >
+              <span class="patient-choice-icon">↻</span>
+              <strong>Existing Patient</strong>
+              <span>Find a patient and record a new visit.</span>
+            </button>
+          </div>
+          
+          <!-- EXISTING PATIENT SEARCH -->
+          <section class="panel form-panel" id="existing-patient-panel" hidden>
+            <div class="form-section-heading">
+              <span>02</span>
+              <div>
+                <h2>Find Existing Patient</h2>
+                <p>Search by the patient's unique ID to view previous visits.</p>
+              </div>
+            </div>
+
+            <form id="existing-patient-search-form">
+              <label>
+                Patient ID
+                <input
+                  id="existing-patient-id"
+                  type="text"
+                  maxlength="30"
+                  placeholder="e.g. P-ABC123"
+                  required
+                />
+              </label>
+
+              <div class="form-actions">
+                <button class="primary-btn" type="submit">
+                  Search Patient
+                </button>
+              </div>
+            </form>
+
+            <p id="existing-patient-message" class="form-message" role="status"></p>
+
+            <div id="existing-patient-details" hidden>
+              <h3 id="existing-patient-name"></h3>
+              <p id="existing-patient-summary"></p>
+
+              <h3>Previous Visits</h3>
+              <div id="existing-patient-history"></div>
+
+              <button
+                type="button"
+                class="primary-btn"
+                id="start-existing-visit"
+              >
+                Record Today's Visit →
+              </button>
+            </div>
+          </section>
+
+          <section class="panel form-panel" id="visit-form-panel">
+            <div class="form-section-heading">
+              <span>01</span>
+              <div>
+                <h2>Patient information</h2>
+                <p>Basic details for this demo record</p>
+              </div>
+            </div>
+            <form id="visit-form" data-patient-mode="new">
+              <div class="form-grid">
+                <label
+                  >Patient full name *
+                  <input
+                    name="name"
+                    required
+                    maxlength="80"
+                    placeholder="e.g. Alex Morgan"
+                  />
+                </label>
+                <label
+                  >Patient ID
+                  <input
+                    name="patientId"
+                    maxlength="30"
+                    placeholder="Auto-generated if empty"
+                    aria-describedby="patient-id-status"
+                  />
+                  <small id="patient-id-status" class="auth-hint" role="status"></small>
+                </label>
+                <label
+                  >Age *
+                  <input
+                    name="age"
+                    type="number"
+                    min="0"
+                    max="130"
+                    step="1"
+                    inputmode="numeric"
+                    required
+                    placeholder="Age in years"
+                  />
+                </label>
+                <label
+                  >Gender *
+                  <select name="gender" required>
+                    <option value="">Select gender</option>
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                    <option value="Non-binary">Non-binary</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                </label>
+                <label
+                  >Visit date *
+                  <input name="date" type="date" required />
+                </label>
+
+                <label
+                  >Visit type *
+                  <select name="visitType" required>
+                    <option value="">Select visit type</option>
+                    <option value="General Consultation">
+                      General Consultation
+                    </option>
+                    <option value="Follow-up">Follow-up</option>
+                    <option value="Routine Check-up">Routine Check-up</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </label>
+
+                <label class="full-field"
+                  >Health issue description *
+                  <textarea
+                    name="healthIssue"
+                    required
+                    maxlength="1500"
+                    rows="4"
+                    placeholder="Describe the patient's current health issue or symptoms..."
+                  ></textarea>
+                </label>
+
+                <label class="full-field"
+                  >Prescribed Medication
+                  <textarea
+                    name="prescribedMedication"
+                    maxlength="1500"
+                    rows="3"
+                    placeholder="Record medication, dosage, frequency, and duration. Leave blank if none."
+                  ></textarea>
+                </label>
+
+                <label class="full-field"
+                  >Tests / Investigations
+                  <textarea
+                    name="testsAndInvestigations"
+                    maxlength="1500"
+                    rows="3"
+                    placeholder="Record tests ordered or completed and any results. Leave blank if none."
+                  ></textarea>
+                </label>
+
+                <label class="full-field"
+                  >Suggested Health Report Tests
+                  <textarea
+                    name="suggestedHealthReportTests"
+                    maxlength="1500"
+                    rows="3"
+                    placeholder="Record health report tests you recommend the patient complete..."
+                  ></textarea>
+                </label>
+
+                <label class="full-field">
+                  Visit notes *
+
+                  <div class="voice-controls">
+                    <select id="voice-language" aria-label="Speech language">
+                      <option value="en-IN">English (India)</option>
+                      <option value="en-US">English (United States)</option>
+                      <option value="en-GB">English (United Kingdom)</option>
+                      <option value="hi-IN">Hindi</option>
+                    </select>
+
+                    <button id="voice-button" type="button">
+                      🎤 Start speaking
+                    </button>
+                  </div>
+
+                  <p id="voice-status" role="status">
+                    Speak clearly in short phrases. Your notes will be added when you finish.
+                  </p>
+
+                  <textarea
+                    name="notes"
+                    required
+                    maxlength="1500"
+                    rows="5"
+                    placeholder="Speak or type the patient's visit notes..."
+                  ></textarea>
+                </label>
+
+                <div class="full-field report-image-field">
+                  <label for="report-image-input">Patient report image</label>
+                  <div class="report-image-actions">
+                    <input
+                      id="report-image-input"
+                      type="file"
+                      accept="image/*"
+                      hidden
+                    />
+                    <input
+                      id="report-camera-input"
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      hidden
+                    />
+                    <button id="upload-report-image" type="button" class="secondary-btn report-image-btn">
+                      <span aria-hidden="true">↑</span> Upload from device
+                    </button>
+                    <button id="capture-report-image" type="button" class="secondary-btn report-image-btn">
+                      <span aria-hidden="true">◎</span> Use camera
+                    </button>
+                  </div>
+                  <p id="report-image-name" class="report-image-name" role="status">
+                    No image selected. Choose a file or take a photo.
+                  </p>
+
+                  <div id="report-image-preview" class="report-image-preview" hidden>
+                    <img id="report-image-thumb" alt="Patient report preview" />
+                    <button id="clear-report-image" type="button" class="text-btn">
+                      Remove image
+                    </button>
+                  </div>
+                </div>
+
+                <label class="full-field"
+                  >Plan / Follow-up
+                  <textarea
+                    name="plan"
+                    maxlength="1000"
+                    rows="3"
+                    placeholder="Optional follow-up information"
+                  ></textarea>
+                </label>
+              </div>
+              <div class="privacy-note">
+                ⓘ Demo only: use fictional data. This form saves to this
+                browser, not a real medical server.
+              </div>
+              <div class="form-actions">
+                <button class="secondary-btn" type="reset">Clear form</button>
+                <button class="primary-btn" type="submit">
+                  Save visit locally →
+                </button>
+              </div>
+              <p id="form-message" class="form-message" role="status"></p>
+            </form>
+          </section>
+        </section>
+
+        <!-- SYNC -->
+        <section class="page" id="sync">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">CONNECTIVITY</p>
+              <h1>Offline & Sync</h1>
+              <p class="subtitle">
+                Review local records and try the synchronization demo.
+              </p>
+            </div>
+          </div>
+          <div class="sync-status-card">
+            <div class="large-status-icon">⇄</div>
+            <div class="sync-status-copy">
+              <p class="eyebrow">CURRENT CONNECTION</p>
+              <h2 id="sync-connection-title">Checking...</h2>
+              <p id="sync-connection-description">
+                Your browser connection status appears here.
+              </p>
+            </div>
+            <span class="status-pill" id="network-pill">Checking</span>
+          </div>
+          <div class="stats-grid two-stats">
+            <article class="stat-card">
+              <div class="stat-top">
+                <span>Pending records</span
+                ><span class="stat-icon orange">◷</span>
+              </div>
+              <h2 id="sync-pending">0</h2>
+              <p>Saved on this device; waiting to upload</p>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top">
+                <span>Synced records</span
+                ><span class="stat-icon green">✓</span>
+              </div>
+              <h2 id="sync-done">0</h2>
+              <p>Uploaded to the database</p>
+            </article>
+          </div>
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Synchronization queue</h2>
+                <p>Pending visits stay on this device until upload succeeds</p>
+              </div>
+              <button id="sync-button" class="primary-btn">
+                ⇄ Upload pending visits
+              </button>
+            </div>
+            <div id="sync-progress-panel" class="sync-upload-progress" role="status" aria-live="polite" hidden>
+              <div class="sync-upload-progress-heading">
+                <span id="sync-progress-label">Preparing upload...</span>
+                <strong id="sync-progress-percent">0%</strong>
+              </div>
+              <div
+                id="sync-progress-track"
+                class="sync-upload-progress-track"
+                role="progressbar"
+                aria-label="Visit upload progress"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+              >
+                <div id="sync-progress-fill" class="sync-upload-progress-fill"></div>
+              </div>
+              <p id="sync-progress-detail" class="sync-upload-progress-detail"></p>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Record ID</th>
+                    <th>Patient</th>
+                    <th>Created</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="sync-table"></tbody>
+              </table>
+            </div>
+            <p class="empty-state" id="sync-empty">No records in the queue.</p>
+            <p id="sync-message" class="form-message" role="status"></p>
+          </section>
+          <div class="privacy-note">
+            Visits are stored in this browser's offline database first. Keep
+            this app open to retry uploads when connectivity returns. Uploaded
+            visits are stored in the local SQLite database.
+          </div>
+        </section>
+
+        <!-- ACTIVITY -->
+        <section class="page" id="activity">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">SYSTEM MONITORING</p>
+              <h1>Activity Log</h1>
+              <p class="subtitle">
+                Review recent actions recorded by this demo.
+              </p>
+            </div>
+            <button id="clear-activity" class="secondary-btn">
+              Clear activity log
+            </button>
+          </div>
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Recent events</h2>
+                <p>Newest events appear first</p>
+              </div>
+            </div>
+            <div id="full-activity" class="activity-list"></div>
+            <p class="empty-state" id="activity-empty">
+              No activity to display.
+            </p>
+          </section>
+        </section>
+
+        <footer class="footer">
+          <span>© 2026 MediSync AI · Hackathon Prototype</span>
+          <span>For demonstration only · Not for real patient data</span>
+        </footer>
+      </div>
+    </main>
+    </div>
+
+    <div id="toast" class="toast" role="status"></div>
+    <script src="script.js"></script>
+  </body>
+</html>
